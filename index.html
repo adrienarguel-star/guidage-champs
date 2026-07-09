@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Guidage champs — GAEC des Templiers du Larzac</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root{
+    --bg:#14171A;
+    --panel:#1D2124;
+    --panel2:#262B2E;
+    --text:#F1EDE4;
+    --dim:#9BA39A;
+    --line:#3A413C;
+    --amber:#F2994A;
+    --amber-dark:#C97427;
+    --green:#8CAE55;
+    --green-dark:#5C7A34;
+    --red:#E2542D;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    padding-bottom:30px;
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:14px 14px 0;}
+  header{padding:6px 2px 12px;border-bottom:1px solid var(--line);margin-bottom:12px;}
+  header h1{font-size:16px;font-weight:600;margin:0 0 2px;letter-spacing:.2px;}
+  header p{font-size:12px;color:var(--dim);margin:0;}
+
+  .tabbar{display:flex;gap:8px;margin-bottom:14px;position:sticky;top:0;background:var(--bg);
+    padding:4px 0 8px;z-index:500;}
+  .tabbar button{
+    flex:1;padding:11px 4px;border-radius:10px;background:var(--panel2);
+    border:1px solid var(--line);color:var(--dim);font-weight:600;font-size:13px;
+  }
+  .tabbar button.active{background:var(--amber);color:#241304;border-color:var(--amber);}
+  .page{display:none;}
+  .page.active{display:block;}
+
+  .status{
+    display:flex;align-items:center;gap:10px;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;margin-bottom:10px;font-size:13px;
+  }
+  .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;background:var(--dim);}
+  .dot.ok{background:var(--green);}
+  .dot.warn{background:var(--amber);}
+  .dot.bad{background:var(--red);}
+  .status .msg{flex:1;color:var(--dim);}
+  .status .acc{font-family:var(--mono);font-weight:600;color:var(--text);}
+
+  .guidance{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:16px 16px 14px;margin-bottom:12px;text-align:center;
+  }
+  .offset-big{
+    font-family:var(--mono);font-size:46px;font-weight:700;line-height:1;
+    letter-spacing:-1px;margin-bottom:4px;
+  }
+  .offset-label{font-size:13px;color:var(--dim);margin-bottom:12px;min-height:16px;}
+
+  .bar-track{
+    position:relative;height:16px;border-radius:8px;margin:0 4px 10px;
+    background:linear-gradient(to right,
+      var(--red) 0%, var(--amber) 22%, var(--green) 42%,
+      var(--green) 58%, var(--amber) 78%, var(--red) 100%);
+    border:1px solid var(--line);
+  }
+  .bar-center{
+    position:absolute;top:-4px;bottom:-4px;left:50%;width:2px;
+    background:rgba(241,237,228,.55);transform:translateX(-1px);
+  }
+  .bar-marker{
+    position:absolute;top:-7px;width:14px;height:30px;
+    background:var(--text);border-radius:3px;
+    transform:translateX(-7px);
+    box-shadow:0 0 0 2px var(--panel);
+    transition:left .25s linear;
+  }
+  .bar-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);
+    font-family:var(--mono);margin:0 2px;}
+
+  .rowinfo{font-size:13px;color:var(--dim);margin-top:2px;}
+  .rowinfo b{color:var(--text);font-family:var(--mono);}
+
+  #mapCard{
+    border-radius:14px;overflow:hidden;border:1px solid var(--line);
+    position:relative;margin-bottom:12px;
+  }
+  #map{height:clamp(340px, 52vh, 560px);width:100%;background:var(--panel2);}
+  #mapRecenter{
+    position:absolute;right:8px;bottom:8px;z-index:1000;
+    width:42px;height:42px;border-radius:8px;background:var(--panel);
+    color:var(--text);border:1px solid var(--line);font-size:18px;
+    display:flex;align-items:center;justify-content:center;padding:0;flex:none;
+  }
+  #mapHint{font-size:11px;color:var(--dim);padding:8px 2px 0;}
+  .leaflet-control-attribution{background:rgba(29,33,36,.75) !important;color:var(--dim) !important;font-size:9px !important;}
+  .leaflet-control-attribution a{color:var(--dim) !important;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .metric{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;
+  }
+  .metric .l{font-size:11px;color:var(--dim);margin-bottom:4px;}
+  .metric .v{font-family:var(--mono);font-size:19px;font-weight:600;}
+
+  section.panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px;margin-bottom:14px;
+  }
+  section.panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.6px;
+    color:var(--dim);margin:0 0 10px;font-weight:600;}
+
+  .btnrow{display:flex;gap:10px;margin-bottom:10px;}
+  button{
+    font:inherit;border:none;border-radius:10px;padding:13px 10px;
+    font-size:14px;font-weight:600;cursor:pointer;flex:1;
+    -webkit-appearance:none;
+  }
+  button.primary{background:var(--amber);color:#241304;}
+  button.primary:active{background:var(--amber-dark);}
+  button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line);}
+  button.secondary:active{background:#2E3438;}
+  button:disabled{opacity:.4;}
+  button.wide{width:100%;}
+
+  .field{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 2px;border-top:1px solid var(--line);}
+  .field:first-child{border-top:none;}
+  .field .flabel{font-size:14px;}
+  .field .fsub{font-size:11px;color:var(--dim);margin-top:2px;}
+  .stepper{display:flex;align-items:center;gap:10px;}
+  .stepper button{flex:none;width:34px;height:34px;padding:0;border-radius:8px;font-size:18px;}
+  .stepper .val{font-family:var(--mono);font-size:16px;min-width:52px;text-align:center;}
+
+  .toggle{position:relative;width:44px;height:26px;flex:none;}
+  .toggle input{opacity:0;width:100%;height:100%;position:absolute;margin:0;cursor:pointer;}
+  .toggle .track{position:absolute;inset:0;background:var(--line);border-radius:13px;transition:.15s;}
+  .toggle .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;
+    background:var(--text);transition:.15s;}
+  .toggle input:checked + .track{background:var(--green-dark);}
+  .toggle input:checked ~ .knob{transform:translateX(18px);}
+
+  footer{font-size:11.5px;color:var(--dim);line-height:1.5;padding:6px 2px 20px;}
+  footer b{color:var(--text);}
+
+  .parcel-item{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:9px 10px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:8px;margin-bottom:8px;
+  }
+  .parcel-item.active{border-color:var(--green);}
+  .parcel-item .pname{font-size:14px;flex:1;}
+  .parcel-item .pmeta{font-size:11px;color:var(--dim);}
+  .parcel-item button{flex:none;padding:8px 12px;font-size:12px;}
+  .flash{animation:flashok .5s ease;}
+  @keyframes flashok{0%{background:var(--green-dark);}100%{background:var(--panel);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>GAEC des Templiers du Larzac</h1>
+    <p>Guidage champs — prototype GPS téléphone</p>
+  </header>
+
+  <div class="tabbar">
+    <button class="active" id="tabBtnTravail">Travail</button>
+    <button id="tabBtnParcelles">Parcelles</button>
+    <button id="tabBtnReglages">Réglages</button>
+  </div>
+
+  <!-- ===== PAGE TRAVAIL ===== -->
+  <div class="page active" id="pageTravail">
+
+    <div class="status">
+      <div class="dot" id="statusDot"></div>
+      <div class="msg" id="statusMsg">En attente de localisation…</div>
+      <div class="acc" id="statusAcc">—</div>
+    </div>
+    <button class="secondary wide" id="btnLocate" style="margin-bottom:12px;">Activer / réessayer la localisation</button>
+
+    <div class="guidance">
+      <div class="offset-big" id="offsetBig" style="color:var(--dim)">— —</div>
+      <div class="offset-label" id="offsetLabel">Marquez le point A pour commencer</div>
+      <div class="bar-track"><div class="bar-center"></div><div class="bar-marker" id="barMarker" style="left:50%"></div></div>
+      <div class="bar-scale"><span id="scaleMin">-1.0 m</span><span id="scaleMax">+1.0 m</span></div>
+      <div class="rowinfo" id="rowInfo">Voie —</div>
+    </div>
+
+    <div id="mapCard">
+      <div id="map"></div>
+      <button id="mapRecenter" aria-label="Recentrer">◎</button>
+    </div>
+    <div id="mapHint">Fond IGN (satellite) — nécessite du réseau au premier chargement des tuiles. La surface déjà travaillée se peint en vert au fil du trajet.</div>
+
+    <div class="grid2" style="margin-top:12px;">
+      <div class="metric"><div class="l">Vitesse</div><div class="v" id="mSpeed">— km/h</div></div>
+      <div class="metric"><div class="l">Cap GPS</div><div class="v" id="mHeading">—°</div></div>
+      <div class="metric"><div class="l">Cap cible</div><div class="v" id="mTarget">—°</div></div>
+      <div class="metric"><div class="l">Distance sur ligne</div><div class="v" id="mAlong">— m</div></div>
+    </div>
+
+    <section class="panel">
+      <h2>Ligne de guidage (méthode A → B)</h2>
+      <div class="btnrow">
+        <button class="primary" id="btnA">Marquer point A</button>
+        <button class="secondary" id="btnB" disabled>Marquer point B</button>
+      </div>
+      <div id="abStatus" style="font-size:13px;color:var(--dim);margin-bottom:10px;">Aucun point enregistré</div>
+      <button class="secondary wide" id="btnReset">Réinitialiser la ligne</button>
+    </section>
+  </div>
+
+  <!-- ===== PAGE PARCELLES ===== -->
+  <div class="page" id="pageParcelles">
+    <section class="panel">
+      <h2>Mes parcelles</h2>
+      <div id="parcelActive" style="font-size:13px;color:var(--dim);margin-bottom:10px;">Aucune parcelle chargée</div>
+      <div id="parcelList"></div>
+      <div class="btnrow">
+        <button class="secondary" id="btnSaveParcel">Enregistrer sous…</button>
+        <button class="secondary" id="btnDeleteParcel" disabled>Supprimer</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Contour de la parcelle</h2>
+      <div id="perimStatus" style="font-size:13px;color:var(--dim);margin-bottom:10px;">Pas de contour enregistré (0 points)</div>
+      <div class="btnrow">
+        <button class="primary" id="btnPerimStart">Démarrer le contour</button>
+        <button class="secondary" id="btnPerimStop" disabled>Terminer le contour</button>
+      </div>
+      <button class="secondary wide" id="btnPerimClear">Effacer le contour</button>
+    </section>
+  </div>
+
+  <!-- ===== PAGE REGLAGES ===== -->
+  <div class="page" id="pageReglages">
+    <section class="panel">
+      <h2>Réglages</h2>
+      <div class="field">
+        <div>
+          <div class="flabel">Largeur de travail</div>
+          <div class="fsub">Espacement entre les voies parallèles</div>
+        </div>
+        <div class="stepper">
+          <button class="secondary" id="spacingMinus">−</button>
+          <div class="val" id="spacingVal">3.0 m</div>
+          <button class="secondary" id="spacingPlus">+</button>
+        </div>
+      </div>
+      <div class="field">
+        <div>
+          <div class="flabel">Guidage vocal</div>
+          <div class="fsub">Annonce l'écart toutes les 3 s</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="voiceToggle">
+          <span class="track"></span>
+          <span class="knob"></span>
+        </label>
+      </div>
+      <div class="field">
+        <div>
+          <div class="flabel">Peindre la surface travaillée</div>
+          <div class="fsub">Colore une bande = largeur de travail, le long du trajet</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="coverageToggle" checked>
+          <span class="track"></span>
+          <span class="knob"></span>
+        </label>
+      </div>
+      <button class="secondary wide" id="btnClearCoverage" style="margin-top:10px;">Effacer la surface peinte</button>
+    </section>
+
+    <footer>
+      <b>Précision réelle :</b> avec le GPS seul du téléphone, comptez 2 à 8 m d'erreur selon le ciel dégagé — insuffisant pour un semis en ligne, correct pour se repérer sur une grande parcelle. Pour descendre au centimètre, il faut un récepteur GNSS externe (RTK) relié en Bluetooth, avec correction gratuite via le réseau <b>Centipède RTK</b>.
+    </footer>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var STORAGE_KEY = 'gaec_guidage_parcelles_v1';
+  var DRAFT_KEY = 'gaec_guidage_draft_v1';
+
+  var state = {
+    pointA: null,
+    pointB: null,
+    spacing: 3.0,
+    voice: false,
+    lastSpeak: 0,
+    lastMsg: "",
+    perimeter: [],
+    recordingPerimeter: false,
+    activeParcelId: null,
+    coveragePaint: true
+  };
+
+  var els = {
+    statusDot: document.getElementById('statusDot'),
+    statusMsg: document.getElementById('statusMsg'),
+    statusAcc: document.getElementById('statusAcc'),
+    offsetBig: document.getElementById('offsetBig'),
+    offsetLabel: document.getElementById('offsetLabel'),
+    barMarker: document.getElementById('barMarker'),
+    scaleMin: document.getElementById('scaleMin'),
+    scaleMax: document.getElementById('scaleMax'),
+    rowInfo: document.getElementById('rowInfo'),
+    mSpeed: document.getElementById('mSpeed'),
+    mHeading: document.getElementById('mHeading'),
+    mTarget: document.getElementById('mTarget'),
+    mAlong: document.getElementById('mAlong'),
+    btnA: document.getElementById('btnA'),
+    btnB: document.getElementById('btnB'),
+    btnReset: document.getElementById('btnReset'),
+    abStatus: document.getElementById('abStatus'),
+    spacingVal: document.getElementById('spacingVal'),
+    spacingMinus: document.getElementById('spacingMinus'),
+    spacingPlus: document.getElementById('spacingPlus'),
+    voiceToggle: document.getElementById('voiceToggle'),
+    parcelActive: document.getElementById('parcelActive'),
+    parcelList: document.getElementById('parcelList'),
+    btnSaveParcel: document.getElementById('btnSaveParcel'),
+    btnDeleteParcel: document.getElementById('btnDeleteParcel'),
+    perimStatus: document.getElementById('perimStatus'),
+    btnPerimStart: document.getElementById('btnPerimStart'),
+    btnPerimStop: document.getElementById('btnPerimStop'),
+    btnPerimClear: document.getElementById('btnPerimClear'),
+    coverageToggle: document.getElementById('coverageToggle'),
+    btnClearCoverage: document.getElementById('btnClearCoverage')
+  };
+
+  // ---------- géométrie ----------
+
+  function toXY(lat, lon, refLat, refLon){
+    var mPerDegLat = 111320;
+    var mPerDegLon = 111320 * Math.cos(refLat * Math.PI / 180);
+    return {
+      x: (lon - refLon) * mPerDegLon,
+      y: (lat - refLat) * mPerDegLat
+    };
+  }
+
+  function invXY(x, y, refLat, refLon){
+    var mPerDegLat = 111320;
+    var mPerDegLon = 111320 * Math.cos(refLat * Math.PI / 180);
+    return { lat: refLat + y / mPerDegLat, lon: refLon + x / mPerDegLon };
+  }
+
+  function bearingOf(x, y){
+    var b = Math.atan2(x, y) * 180 / Math.PI;
+    if (b < 0) b += 360;
+    return b;
+  }
+
+  function distanceM(lat1, lon1, lat2, lon2){
+    var xy = toXY(lat2, lon2, lat1, lon1);
+    return Math.sqrt(xy.x*xy.x + xy.y*xy.y);
+  }
+
+  function polygonAreaHa(perimeter){
+    if (!perimeter || perimeter.length < 3) return 0;
+    var ref = perimeter[0];
+    var pts = perimeter.map(function(p){ return toXY(p[0], p[1], ref[0], ref[1]); });
+    var area = 0;
+    for (var i = 0; i < pts.length; i++){
+      var j = (i + 1) % pts.length;
+      area += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
+    }
+    return Math.abs(area) / 2 / 10000;
+  }
+
+  function fmt(n, d){ return Number(n).toFixed(d); }
+
+  // ---------- UI helpers ----------
+
+  function setStatus(kind, msg){
+    els.statusDot.className = 'dot ' + kind;
+    els.statusMsg.textContent = msg;
+  }
+
+  function vibrate(pattern){
+    try{ if (navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
+  }
+
+  function flashEl(el){
+    el.classList.remove('flash');
+    void el.offsetWidth;
+    el.classList.add('flash');
+  }
+
+  function speak(text){
+    if (!state.voice) return;
+    var now = Date.now();
+    if (now - state.lastSpeak < 3000) return;
+    if (text === state.lastMsg && now - state.lastSpeak < 6000) return;
+    state.lastSpeak = now;
+    state.lastMsg = text;
+    try{
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'fr-FR';
+      speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  // ---------- stockage local ----------
+
+  function loadParcels(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){ return []; }
+  }
+
+  function saveParcelsList(list){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }catch(e){}
+  }
+
+  function persistDraft(){
+    try{
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        pointA: state.pointA, pointB: state.pointB,
+        perimeter: state.perimeter, spacing: state.spacing
+      }));
+    }catch(e){}
+  }
+
+  function loadDraft(){
+    try{
+      var raw = localStorage.getItem(DRAFT_KEY);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){ return null; }
+  }
+
+  // ---------- onglets ----------
+
+  var pages = {
+    travail: document.getElementById('pageTravail'),
+    parcelles: document.getElementById('pageParcelles'),
+    reglages: document.getElementById('pageReglages')
+  };
+  var tabBtns = {
+    travail: document.getElementById('tabBtnTravail'),
+    parcelles: document.getElementById('tabBtnParcelles'),
+    reglages: document.getElementById('tabBtnReglages')
+  };
+
+  function showPage(name){
+    Object.keys(pages).forEach(function(k){
+      pages[k].classList.toggle('active', k === name);
+      tabBtns[k].classList.toggle('active', k === name);
+    });
+    if (name === 'travail' && mapState.map){
+      setTimeout(function(){
+        mapState.map.invalidateSize();
+        if (window.__lastPos) mapState.map.panTo([window.__lastPos.coords.latitude, window.__lastPos.coords.longitude]);
+      }, 30);
+    }
+  }
+  tabBtns.travail.addEventListener('click', function(){ showPage('travail'); });
+  tabBtns.parcelles.addEventListener('click', function(){ showPage('parcelles'); });
+  tabBtns.reglages.addEventListener('click', function(){ showPage('reglages'); });
+
+  // ---------- guidage ----------
+
+  function updateBar(offsetToLine, halfRange){
+    var clamped = Math.max(-halfRange, Math.min(halfRange, offsetToLine));
+    var pct = ((clamped + halfRange) / (2 * halfRange)) * 100;
+    els.barMarker.style.left = pct + '%';
+    els.scaleMin.textContent = '-' + fmt(halfRange, 1) + ' m';
+    els.scaleMax.textContent = '+' + fmt(halfRange, 1) + ' m';
+  }
+
+  function updateABStatus(){
+    var a = state.pointA ? 'A ✓' : 'A —';
+    var b = state.pointB ? 'B ✓' : 'B —';
+    var extra = '';
+    if (state.pointA && !state.pointB && window.__lastPos){
+      var d = distanceM(state.pointA.lat, state.pointA.lon, window.__lastPos.coords.latitude, window.__lastPos.coords.longitude);
+      extra = ' · distance depuis A : ' + fmt(d,0) + ' m' + (d < 15 ? ' (continuez, 15 m mini conseillés)' : ' — vous pouvez marquer B');
+    }
+    els.abStatus.textContent = 'Ligne : ' + a + ' / ' + b + extra;
+    els.btnDeleteParcel.disabled = !state.activeParcelId;
+  }
+
+  function updatePerimStatus(){
+    var n = state.perimeter.length;
+    var areaTxt = n >= 3 ? ' · ' + fmt(polygonAreaHa(state.perimeter), 2) + ' ha' : '';
+    els.perimStatus.textContent = state.recordingPerimeter
+      ? 'Enregistrement en cours… ' + n + ' points'
+      : ((n >= 3 ? n + ' points enregistrés' : 'Pas de contour enregistré (' + n + ' points)') + areaTxt);
+  }
+
+  function renderParcelList(){
+    var list = loadParcels();
+    els.parcelList.innerHTML = '';
+    if (!list.length){
+      els.parcelList.innerHTML = '<div style="font-size:12px;color:var(--dim);margin-bottom:8px;">Aucune parcelle enregistrée pour l\'instant.</div>';
+      return;
+    }
+    list.forEach(function(p){
+      var row = document.createElement('div');
+      row.className = 'parcel-item' + (p.id === state.activeParcelId ? ' active' : '');
+      var hasPerim = p.perimeter && p.perimeter.length >= 3;
+      var perimTxt = hasPerim ? (fmt(polygonAreaHa(p.perimeter),2) + ' ha') : 'sans contour';
+      var lineTxt = p.pointA && p.pointB ? (fmt(p.spacing,1) + ' m') : 'sans ligne A/B';
+      row.innerHTML = '<div><div class="pname">' + p.name + '</div><div class="pmeta">' + lineTxt + ' · ' + perimTxt + '</div></div>';
+      var btn = document.createElement('button');
+      btn.className = 'secondary';
+      btn.textContent = 'Charger';
+      btn.addEventListener('click', function(){ loadParcel(p.id); });
+      row.appendChild(btn);
+      els.parcelList.appendChild(row);
+    });
+  }
+
+  function loadParcel(id){
+    var list = loadParcels();
+    var p = list.find(function(x){ return x.id === id; });
+    if (!p) return;
+    state.pointA = p.pointA || null;
+    state.pointB = p.pointB || null;
+    state.spacing = p.spacing || 3.0;
+    state.perimeter = p.perimeter || [];
+    state.activeParcelId = p.id;
+    els.btnB.disabled = !state.pointA;
+    els.spacingVal.textContent = fmt(state.spacing,1) + ' m';
+    var areaTxt = state.perimeter.length >= 3 ? ' (' + fmt(polygonAreaHa(state.perimeter),2) + ' ha)' : '';
+    els.parcelActive.textContent = 'Parcelle chargée : ' + p.name + areaTxt;
+    updateABStatus();
+    updatePerimStatus();
+    updateMapLine();
+    updateMapPerimeter();
+    renderParcelList();
+    setStatus('ok', 'Parcelle "' + p.name + '" chargée');
+    showPage('travail');
+
+    if (mapState.map){
+      var boundsPts = [];
+      if (state.perimeter.length >= 2) boundsPts = boundsPts.concat(state.perimeter);
+      if (state.pointA) boundsPts.push([state.pointA.lat, state.pointA.lon]);
+      if (state.pointB) boundsPts.push([state.pointB.lat, state.pointB.lon]);
+      if (boundsPts.length >= 2){
+        mapState.follow = false;
+        setTimeout(function(){
+          mapState.map.invalidateSize();
+          mapState.map.fitBounds(L.latLngBounds(boundsPts), { padding: [40,40] });
+        }, 50);
+      }
+    }
+  }
+
+  function renderNoLine(pos){
+    els.offsetBig.style.color = 'var(--dim)';
+    els.offsetBig.textContent = '— —';
+    els.offsetLabel.textContent = state.pointA ? 'Roulez puis marquez le point B' : 'Marquez le point A pour commencer';
+    els.rowInfo.textContent = 'Voie —';
+    els.mTarget.textContent = '—°';
+    els.mAlong.textContent = '— m';
+    updateBar(0, Math.max(state.spacing/2, 1));
+  }
+
+  function renderGuidance(pos){
+    var A = state.pointA, B = state.pointB;
+    var abXY = toXY(B.lat, B.lon, A.lat, A.lon);
+    var abLen = Math.sqrt(abXY.x*abXY.x + abXY.y*abXY.y);
+    if (abLen < 3){
+      renderNoLine(pos);
+      els.offsetLabel.textContent = 'Point B trop proche du point A — roulez plus loin';
+      return;
+    }
+    var ux = abXY.x / abLen, uy = abXY.y / abLen;
+    var nx = -uy, ny = ux;
+
+    var p = toXY(pos.coords.latitude, pos.coords.longitude, A.lat, A.lon);
+    var cross = p.x*nx + p.y*ny;
+    var along = p.x*ux + p.y*uy;
+
+    var spacing = state.spacing;
+    var lineIndex = Math.round(cross / spacing);
+    var offsetToNearest = cross - lineIndex * spacing;
+
+    var targetBearing = bearingOf(ux, uy);
+    var reversed = false;
+    if (pos.coords.heading !== null && !isNaN(pos.coords.heading)){
+      var headingDiff = ((targetBearing - pos.coords.heading + 540) % 360) - 180;
+      reversed = Math.abs(headingDiff) > 90;
+    }
+    var displayOffset = reversed ? -offsetToNearest : offsetToNearest;
+
+    var cm = Math.round(displayOffset * 100);
+    var absCm = Math.abs(cm);
+    var side = cm < 0 ? 'GAUCHE' : (cm > 0 ? 'DROITE' : '');
+    var aligned = absCm < 10;
+
+    var color = aligned ? 'var(--green)' : (absCm < 40 ? 'var(--amber)' : 'var(--red)');
+    els.offsetBig.style.color = color;
+
+    var mainText;
+    if (aligned){
+      mainText = 'ALIGNÉ';
+      els.offsetLabel.textContent = 'Vous êtes sur la voie ' + (lineIndex === 0 ? 'A' : (lineIndex>0?'+':'') + lineIndex);
+    } else {
+      var meters = absCm >= 100 ? fmt(absCm/100, 2) + ' m' : absCm + ' cm';
+      mainText = meters;
+      els.offsetLabel.textContent = side + ' — voie ' + (lineIndex === 0 ? 'A' : (lineIndex>0?'+':'') + lineIndex);
+    }
+    els.offsetBig.textContent = mainText;
+
+    els.rowInfo.innerHTML = 'Voie actuelle visée : <b>' + (lineIndex === 0 ? 'A' : (lineIndex>0?'+':'') + lineIndex) + '</b> · espacement <b>' + fmt(spacing,1) + ' m</b>';
+
+    var halfRange = Math.max(spacing/2, 0.5);
+    updateBar(displayOffset, halfRange);
+
+    els.mTarget.textContent = Math.round(targetBearing) + '°';
+    els.mAlong.textContent = fmt(along, 0) + ' m';
+
+    if (aligned){
+      speak('Aligné');
+    } else {
+      var spoken = (absCm >= 100 ? fmt(absCm/100,1) + ' mètres' : absCm + ' centimètres') + ' à ' + side.toLowerCase();
+      speak(spoken);
+    }
+  }
+
+  // ---------- carte ----------
+
+  var mapState = {
+    map: null, marker: null, accCircle: null,
+    trail: null, trailLatLngs: [], abLayer: null, perimLayer: null,
+    coverageLayer: null, lastCoveragePos: null, follow: true
+  };
+
+  function paintCoverage(prevLat, prevLon, curLat, curLon){
+    if (!mapState.coverageLayer) return;
+    var xy = toXY(curLat, curLon, prevLat, prevLon);
+    var len = Math.sqrt(xy.x*xy.x + xy.y*xy.y);
+    if (len < 0.4 || len > 30) return;
+    var ux = xy.x/len, uy = xy.y/len;
+    var nx = -uy, ny = ux;
+    var half = Math.max(state.spacing/2, 0.3);
+    var c1 = invXY(-nx*half, -ny*half, prevLat, prevLon);
+    var c2 = invXY(nx*half, ny*half, prevLat, prevLon);
+    var c3 = invXY(xy.x + nx*half, xy.y + ny*half, prevLat, prevLon);
+    var c4 = invXY(xy.x - nx*half, xy.y - ny*half, prevLat, prevLon);
+    L.polygon(
+      [[c1.lat,c1.lon],[c2.lat,c2.lon],[c3.lat,c3.lon],[c4.lat,c4.lon]],
+      { stroke:false, fillColor:'#8CAE55', fillOpacity:0.32, interactive:false }
+    ).addTo(mapState.coverageLayer);
+  }
+
+  function initMap(){
+    if (mapState.map || typeof L === 'undefined') return;
+    var center = window.__lastPos
+      ? [window.__lastPos.coords.latitude, window.__lastPos.coords.longitude]
+      : [44.1, 3.1];
+    mapState.map = L.map('map', { attributionControl: true, zoomControl: true }).setView(center, 18);
+    L.tileLayer(
+      'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&TILEMATRIXSET=PM&TILEMATRIX={z}&TILECOL={x}&TILEROW={y}&FORMAT=image/jpeg',
+      { maxZoom: 19, attribution: 'IGN-F/Geoportail' }
+    ).addTo(mapState.map);
+    mapState.coverageLayer = L.layerGroup().addTo(mapState.map);
+    mapState.trail = L.polyline([], { color: '#F2994A', weight: 3, opacity: .8 }).addTo(mapState.map);
+    mapState.abLayer = L.layerGroup().addTo(mapState.map);
+    mapState.map.on('dragstart', function(){ mapState.follow = false; });
+    setTimeout(function(){ mapState.map.invalidateSize(); }, 100);
+    if (window.__lastPos) updateMapPosition(window.__lastPos);
+    updateMapLine();
+    updateMapPerimeter();
+  }
+
+  function updateMapPosition(pos){
+    if (!mapState.map) return;
+    var latlng = [pos.coords.latitude, pos.coords.longitude];
+    if (!mapState.marker){
+      mapState.marker = L.circleMarker(latlng, { radius: 7, color: '#F1EDE4', weight: 2, fillColor: '#F2994A', fillOpacity: 1 }).addTo(mapState.map);
+      mapState.accCircle = L.circle(latlng, { radius: pos.coords.accuracy, color: '#F2994A', weight: 1, fillOpacity: .08 }).addTo(mapState.map);
+    } else {
+      mapState.marker.setLatLng(latlng);
+      mapState.accCircle.setLatLng(latlng);
+      mapState.accCircle.setRadius(pos.coords.accuracy);
+    }
+    mapState.trailLatLngs.push(latlng);
+    if (mapState.trailLatLngs.length > 500) mapState.trailLatLngs.shift();
+    mapState.trail.setLatLngs(mapState.trailLatLngs);
+    if (mapState.follow) mapState.map.panTo(latlng, { animate: true });
+  }
+
+  function updateMapLine(){
+    if (!mapState.map) return;
+    mapState.abLayer.clearLayers();
+    if (!state.pointA || !state.pointB) return;
+    var A = state.pointA, B = state.pointB;
+    var abXY = toXY(B.lat, B.lon, A.lat, A.lon);
+    var abLen = Math.sqrt(abXY.x*abXY.x + abXY.y*abXY.y);
+    if (abLen < 3) return;
+    var ux = abXY.x/abLen, uy = abXY.y/abLen;
+    var nx = -uy, ny = ux;
+    var extend = 120;
+
+    function lineAtOffset(offset, main){
+      var p1 = invXY(-ux*extend + nx*offset, -uy*extend + ny*offset, A.lat, A.lon);
+      var p2 = invXY(abXY.x + ux*extend + nx*offset, abXY.y + uy*extend + ny*offset, A.lat, A.lon);
+      L.polyline([[p1.lat,p1.lon],[p2.lat,p2.lon]], {
+        color: main ? '#F2994A' : '#8CAE55',
+        weight: main ? 3 : 1.5,
+        opacity: main ? 0.9 : 0.5,
+        dashArray: main ? null : '6,6'
+      }).addTo(mapState.abLayer);
+    }
+
+    lineAtOffset(0, true);
+    for (var k=1; k<=3; k++){
+      lineAtOffset(k*state.spacing, false);
+      lineAtOffset(-k*state.spacing, false);
+    }
+    L.circleMarker([A.lat,A.lon], { radius:5, color:'#F1EDE4', fillColor:'#8CAE55', fillOpacity:1, weight:2 }).addTo(mapState.abLayer);
+    L.circleMarker([B.lat,B.lon], { radius:5, color:'#F1EDE4', fillColor:'#8CAE55', fillOpacity:1, weight:2 }).addTo(mapState.abLayer);
+  }
+
+  function updateMapPerimeter(){
+    if (!mapState.map) return;
+    if (mapState.perimLayer) mapState.map.removeLayer(mapState.perimLayer);
+    if (state.perimeter.length < 2) return;
+    mapState.perimLayer = L.polygon(state.perimeter, {
+      color: '#F1EDE4', weight: 2, opacity: .8, fillColor: '#F2994A', fillOpacity: .08, dashArray: state.recordingPerimeter ? '4,6' : null
+    }).addTo(mapState.map);
+  }
+
+  // ---------- position GPS ----------
+
+  function onPosition(pos){
+    var acc = pos.coords.accuracy;
+    els.statusAcc.textContent = '±' + fmt(acc,1) + ' m';
+    if (acc <= 3) setStatus('ok', 'Signal GPS correct');
+    else if (acc <= 8) setStatus('warn', 'Signal GPS moyen');
+    else setStatus('bad', 'Signal GPS faible');
+
+    var speedKmh = (pos.coords.speed !== null && !isNaN(pos.coords.speed)) ? pos.coords.speed * 3.6 : null;
+    els.mSpeed.textContent = speedKmh !== null ? fmt(speedKmh,1) + ' km/h' : '— km/h';
+    els.mHeading.textContent = (pos.coords.heading !== null && !isNaN(pos.coords.heading)) ? Math.round(pos.coords.heading) + '°' : '—°';
+
+    window.__lastPos = pos;
+
+    if (!mapState.map) initMap();
+
+    if (state.pointA && state.pointB){
+      renderGuidance(pos);
+    } else {
+      renderNoLine(pos);
+    }
+    updateABStatus();
+
+    if (state.recordingPerimeter){
+      var last = state.perimeter[state.perimeter.length - 1];
+      var d = last ? distanceM(last[0], last[1], pos.coords.latitude, pos.coords.longitude) : 999;
+      if (d > 2){
+        state.perimeter.push([pos.coords.latitude, pos.coords.longitude]);
+        updatePerimStatus();
+        updateMapPerimeter();
+        persistDraft();
+      }
+    }
+
+    if (mapState.map && state.coveragePaint){
+      if (mapState.lastCoveragePos){
+        paintCoverage(mapState.lastCoveragePos.lat, mapState.lastCoveragePos.lon, pos.coords.latitude, pos.coords.longitude);
+      }
+      mapState.lastCoveragePos = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    }
+
+    updateMapPosition(pos);
+  }
+
+  var watchId = null;
+
+  function onError(err){
+    var msg;
+    switch(err.code){
+      case 1:
+        msg = 'Localisation refusée. Ouvrez les infos du site (icône i ou cadenas à côté de l\'adresse) > Autorisations > Position > Autoriser, puis appuyez sur "Réessayer".';
+        break;
+      case 2:
+        msg = 'Position indisponible. Vérifiez que la localisation est activée dans les réglages du téléphone (pas seulement dans le navigateur) et que vous êtes à l\'extérieur.';
+        break;
+      case 3:
+        msg = 'Délai dépassé — pas de signal GPS reçu. Sortez à l\'air libre, loin des bâtiments, et appuyez sur "Réessayer".';
+        break;
+      default:
+        msg = 'Erreur de localisation : ' + err.message;
+    }
+    setStatus('bad', msg);
+  }
+
+  function requestLocation(){
+    if (!('geolocation' in navigator)){
+      setStatus('bad', 'Ce navigateur ne supporte pas la géolocalisation.');
+      return;
+    }
+    if (window.isSecureContext === false){
+      setStatus('bad', 'Page non sécurisée (pas de https) : le navigateur bloque la localisation ici.');
+      return;
+    }
+    setStatus('warn', 'Demande de localisation en cours…');
+    if (watchId !== null){
+      navigator.geolocation.clearWatch(watchId);
+    }
+    navigator.geolocation.getCurrentPosition(onPosition, onError, {
+      enableHighAccuracy: true, timeout: 15000, maximumAge: 0
+    });
+    watchId = navigator.geolocation.watchPosition(onPosition, onError, {
+      enableHighAccuracy: true, maximumAge: 1000, timeout: 15000
+    });
+  }
+
+  document.getElementById('btnLocate').addEventListener('click', requestLocation);
+
+  // ---------- boutons A/B ----------
+
+  els.btnA.addEventListener('click', function(){
+    if (!window.__lastPos){ setStatus('warn','Aucune position GPS reçue pour le moment — attendez le signal puis réessayez'); return; }
+    state.pointA = { lat: window.__lastPos.coords.latitude, lon: window.__lastPos.coords.longitude };
+    state.pointB = null;
+    state.activeParcelId = null;
+    els.btnB.disabled = false;
+    els.offsetLabel.textContent = 'Point A enregistré (±' + fmt(window.__lastPos.coords.accuracy,1) + ' m) — roulez au moins 15-20 m puis marquez B';
+    flashEl(els.btnA);
+    vibrate(80);
+    updateABStatus();
+    updateMapLine();
+    renderParcelList();
+    persistDraft();
+  });
+
+  els.btnB.addEventListener('click', function(){
+    if (!window.__lastPos || !state.pointA) return;
+    var d = distanceM(state.pointA.lat, state.pointA.lon, window.__lastPos.coords.latitude, window.__lastPos.coords.longitude);
+    if (d < 3){
+      setStatus('warn', 'Trop proche du point A (' + fmt(d,0) + ' m) — avancez encore avant de marquer B');
+      vibrate([40,60,40]);
+      return;
+    }
+    state.pointB = { lat: window.__lastPos.coords.latitude, lon: window.__lastPos.coords.longitude };
+    state.activeParcelId = null;
+    flashEl(els.btnB);
+    vibrate([80,40,80]);
+    updateABStatus();
+    updateMapLine();
+    renderParcelList();
+    persistDraft();
+  });
+
+  els.btnReset.addEventListener('click', function(){
+    state.pointA = null;
+    state.pointB = null;
+    state.activeParcelId = null;
+    els.btnB.disabled = true;
+    renderNoLine(window.__lastPos);
+    updateABStatus();
+    updateMapLine();
+    renderParcelList();
+    persistDraft();
+  });
+
+  // ---------- réglages ----------
+
+  els.spacingMinus.addEventListener('click', function(){
+    state.spacing = Math.max(0.5, Math.round((state.spacing - 0.5)*10)/10);
+    els.spacingVal.textContent = fmt(state.spacing,1) + ' m';
+    updateMapLine();
+  });
+  els.spacingPlus.addEventListener('click', function(){
+    state.spacing = Math.min(24, Math.round((state.spacing + 0.5)*10)/10);
+    els.spacingVal.textContent = fmt(state.spacing,1) + ' m';
+    updateMapLine();
+  });
+
+  els.voiceToggle.addEventListener('change', function(){
+    state.voice = els.voiceToggle.checked;
+  });
+
+  els.coverageToggle.addEventListener('change', function(){
+    state.coveragePaint = els.coverageToggle.checked;
+    mapState.lastCoveragePos = null;
+  });
+
+  els.btnClearCoverage.addEventListener('click', function(){
+    if (mapState.coverageLayer) mapState.coverageLayer.clearLayers();
+    mapState.lastCoveragePos = null;
+  });
+
+  // ---------- parcelles ----------
+
+  els.btnSaveParcel.addEventListener('click', function(){
+    var hasLine = state.pointA && state.pointB;
+    var hasPerim = state.perimeter.length >= 3;
+    if (!hasLine && !hasPerim){
+      setStatus('warn', 'Marquez une ligne A→B, ou enregistrez un contour, avant de sauvegarder');
+      return;
+    }
+    var name = window.prompt('Nom de la parcelle (ex : Grand Clos, Parcelle 12...)', '');
+    if (!name) return;
+    var list = loadParcels();
+    var id = 'p_' + Date.now();
+    list.push({
+      id: id, name: name.trim(), spacing: state.spacing,
+      pointA: state.pointA, pointB: state.pointB,
+      perimeter: state.perimeter, created: new Date().toISOString()
+    });
+    saveParcelsList(list);
+    state.activeParcelId = id;
+    var areaTxt = hasPerim ? ' (' + fmt(polygonAreaHa(state.perimeter),2) + ' ha)' : '';
+    els.parcelActive.textContent = 'Parcelle chargée : ' + name.trim() + areaTxt;
+    renderParcelList();
+    updateABStatus();
+    setStatus('ok', 'Parcelle "' + name.trim() + '" enregistrée');
+    vibrate(100);
+  });
+
+  els.btnDeleteParcel.addEventListener('click', function(){
+    if (!state.activeParcelId) return;
+    var list = loadParcels();
+    var p = list.find(function(x){ return x.id === state.activeParcelId; });
+    if (!p) return;
+    if (!window.confirm('Supprimer la parcelle "' + p.name + '" ? Cette action est définitive.')) return;
+    list = list.filter(function(x){ return x.id !== state.activeParcelId; });
+    saveParcelsList(list);
+    state.activeParcelId = null;
+    els.parcelActive.textContent = 'Aucune parcelle chargée';
+    renderParcelList();
+    updateABStatus();
+  });
+
+  els.btnPerimStart.addEventListener('click', function(){
+    state.recordingPerimeter = true;
+    state.perimeter = [];
+    if (window.__lastPos){
+      state.perimeter.push([window.__lastPos.coords.latitude, window.__lastPos.coords.longitude]);
+    }
+    els.btnPerimStart.disabled = true;
+    els.btnPerimStop.disabled = false;
+    updatePerimStatus();
+    persistDraft();
+    setStatus('ok', 'Enregistrement du contour démarré — roulez ou marchez le long de la parcelle');
+  });
+
+  els.btnPerimStop.addEventListener('click', function(){
+    state.recordingPerimeter = false;
+    els.btnPerimStart.disabled = false;
+    els.btnPerimStop.disabled = true;
+    updatePerimStatus();
+    updateMapPerimeter();
+    persistDraft();
+    setStatus('ok', 'Contour terminé : ' + state.perimeter.length + ' points — pensez à l\'enregistrer dans l\'onglet Parcelles');
+    vibrate(100);
+  });
+
+  els.btnPerimClear.addEventListener('click', function(){
+    state.perimeter = [];
+    state.recordingPerimeter = false;
+    els.btnPerimStart.disabled = false;
+    els.btnPerimStop.disabled = true;
+    updatePerimStatus();
+    updateMapPerimeter();
+    persistDraft();
+  });
+
+  // ---------- carte : recentrer ----------
+
+  document.getElementById('mapRecenter').addEventListener('click', function(){
+    mapState.follow = true;
+    if (mapState.map && window.__lastPos){
+      mapState.map.setView([window.__lastPos.coords.latitude, window.__lastPos.coords.longitude], mapState.map.getZoom());
+    }
+  });
+
+  // ---------- init ----------
+
+  (function restoreDraft(){
+    var d = loadDraft();
+    if (!d) return;
+    if (d.pointA) state.pointA = d.pointA;
+    if (d.pointB) state.pointB = d.pointB;
+    if (d.perimeter && d.perimeter.length) state.perimeter = d.perimeter;
+    if (d.spacing) state.spacing = d.spacing;
+    els.btnB.disabled = !state.pointA;
+    els.spacingVal.textContent = fmt(state.spacing,1) + ' m';
+    if (state.pointA || state.perimeter.length){
+      setStatus('ok', 'Session précédente restaurée (' + (state.perimeter.length ? state.perimeter.length + ' pts contour' : 'ligne A/B') + ') — pensez à l\'enregistrer dans Parcelles si ce n\'est pas déjà fait');
+    }
+  })();
+
+  updateBar(0, 1.5);
+  updateABStatus();
+  updatePerimStatus();
+  renderParcelList();
+  initMap();
+  requestLocation();
+})();
+</script>
+</body>
+</html>
