@@ -1,0 +1,17 @@
+{
+  "name": "Guidage Champs — GAEC des Templiers du Larzac",
+  "short_name": "Guidage Champs",
+  "description": "Guidage GPS pour travaux des champs — GAEC des Templiers du Larzac",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14171A",
+  "theme_color": "#14171A",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
