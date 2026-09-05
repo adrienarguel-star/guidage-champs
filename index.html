@@ -37,9 +37,11 @@
     padding-bottom:30px;
   }
   .wrap{max-width:520px;margin:0 auto;padding:14px 14px 0;}
-  header{padding:6px 2px 12px;border-bottom:1px solid var(--line);margin-bottom:12px;}
+  header{padding:6px 2px 12px;border-bottom:1px solid var(--line);margin-bottom:12px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
   header h1{font-size:16px;font-weight:600;margin:0 0 2px;letter-spacing:.2px;}
   header p{font-size:12px;color:var(--dim);margin:0;}
+  header a{font-size:11px;color:var(--amber);text-decoration:none;white-space:nowrap;padding-top:2px;}
 
   .tabbar{display:flex;gap:8px;margin-bottom:14px;position:sticky;top:0;background:var(--bg);
     padding:4px 0 8px;z-index:500;}
@@ -217,8 +219,11 @@
 <div class="wrap">
 
   <header>
-    <h1>GAEC des Templiers du Larzac</h1>
-    <p>Guidage champs — prototype GPS téléphone</p>
+    <div>
+      <h1>GAEC des Templiers du Larzac</h1>
+      <p>Guidage champs — prototype GPS téléphone</p>
+    </div>
+    <a href="./parcellaire/index.html">↔ Parcellaire</a>
   </header>
 
   <div class="tabbar">
