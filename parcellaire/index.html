@@ -291,179 +291,203 @@
   var CACHE_PREFIX = 'parcellaire_cadcache_v1_';
   var CACHE_MAX_AGE_MS = 180 * 24 * 3600 * 1000;
 
-  // ---------- données de départ (document CR 2022 / V12 — échanges amiables, commune 12082) ----------
-  var SEED_COMMUNE = { codeInsee: '12082', nom: 'La Couvertoirade' };
+    // ---------- données de départ (document CR 2022 / V12 — échanges amiables) ----------
+  var SEED_VERSION = 2;
+  var KNOWN_COMMUNE_CODES = { 'la couvertoirade': '12082' };
   var SEED_ROWS = [
-    ['André Bertrand','A',146,0.71,'Conservée'],
-    ['André Bertrand','A',147,0.65,'Conservée'],
-    ['André Bertrand','A',148,1.53,'Conservée'],
-    ['André Bertrand','O',219,0.75,'Conservée'],
-    ['André Bertrand','O',220,0.03,'Conservée'],
-    ['André Bertrand','O',221,0.06,'Conservée'],
-    ['André Bertrand','O',222,0.05,'Conservée'],
-    ['André Bertrand','O',223,0.14,'Conservée'],
-    ['André Bertrand','O',224,0.39,'Conservée'],
-    ['Commune de La Couvertoirade','A',140,0.24,'Conservée'],
-    ['Commune de La Couvertoirade','A',141,0.13,'Conservée'],
-    ['Commune de La Couvertoirade','A',159,1.32,'Conservée'],
-    ['Commune de La Couvertoirade','A',160,0.93,'Conservée'],
-    ['Commune de La Couvertoirade','A',161,2.62,'Conservée'],
-    ['Commune de La Couvertoirade','A',162,0.65,'Conservée'],
-    ['Commune de La Couvertoirade','A',163,0.84,'Conservée'],
-    ['Commune de La Couvertoirade','A',164,0.24,'Conservée'],
-    ['Commune de La Couvertoirade','A',165,5.36,'Conservée'],
-    ['Commune de La Couvertoirade','A',166,0.19,'Conservée'],
-    ['Commune de La Couvertoirade','A',167,0.37,'Conservée'],
-    ['Commune de La Couvertoirade','A',168,0.62,'Conservée'],
-    ['Commune de La Couvertoirade','A',170,0.98,'Conservée'],
-    ['Commune de La Couvertoirade','A',247,17.62,'Nouvelle (reçue)'],
-    ['Commune de La Couvertoirade','A',248,0.73,'Nouvelle (reçue)'],
-    ['Commune de La Couvertoirade','A',249,0.07,'Nouvelle (reçue)'],
-    ['Commune de La Couvertoirade','M',32,0.69,'Conservée'],
-    ['Commune de La Couvertoirade','M',36,1.08,'Conservée'],
-    ['Commune de La Couvertoirade','M',316,2.40,'Conservée'],
-    ['Commune de La Couvertoirade','M',319,2.77,'Conservée'],
-    ['Commune de La Couvertoirade','M',320,0.29,'Conservée'],
-    ['Commune de La Couvertoirade','M',323,0.92,'Conservée'],
-    ['Commune de La Couvertoirade','N',15,0.15,'Conservée'],
-    ['Commune de La Couvertoirade','N',16,4.84,'Conservée'],
-    ['Commune de La Couvertoirade','N',17,0.49,'Conservée'],
-    ['Commune de La Couvertoirade','N',19,4.79,'Conservée'],
-    ['Commune de La Couvertoirade','N',98,0.68,'Nouvelle (reçue)'],
-    ['Commune de La Couvertoirade','N',99,4.16,'Nouvelle (reçue)'],
-    ['Commune de La Couvertoirade','O',199,0.11,'Conservée'],
-    ['Huissoud Bernard','N',53,0.26,'Conservée'],
-    ['SC GFA Larzac','A',111,0.43,'Conservée'],
-    ['SC GFA Larzac','A',112,0.29,'Conservée'],
-    ['SC GFA Larzac','A',113,1.90,'Conservée'],
-    ['SC GFA Larzac','A',114,0.53,'Conservée'],
-    ['SC GFA Larzac','A',115,0.28,'Conservée'],
-    ['SC GFA Larzac','A',116,2.44,'Conservée'],
-    ['SC GFA Larzac','A',119,1.22,'Nouvelle (reçue)'],
-    ['SC GFA Larzac','A',120,0.36,'Nouvelle (reçue)'],
-    ['SC GFA Larzac','A',169,2.85,'Conservée'],
-    ['SC GFA Larzac','A',171,0.62,'Conservée'],
-    ['SC GFA Larzac','A',207,0.75,'Conservée'],
-    ['SC GFA Larzac','A',208,0.60,'Conservée'],
-    ['SC GFA Larzac','A',209,3.59,'Conservée'],
-    ['SC GFA Larzac','A',210,0.68,'Conservée'],
-    ['SC GFA Larzac','A',211,0.78,'Conservée'],
-    ['SC GFA Larzac','A',212,0.83,'Conservée'],
-    ['SC GFA Larzac','A',213,3.08,'Conservée'],
-    ['SC GFA Larzac','A',214,0.12,'Conservée'],
-    ['SC GFA Larzac','A',220,0.22,'Conservée'],
-    ['SC GFA Larzac','A',221,4.67,'Conservée'],
-    ['SC GFA Larzac','A',223,0.03,'Conservée'],
-    ['SC GFA Larzac','N',54,2.26,'Conservée'],
-    ['SC GFA Larzac','N',55,0.29,'Conservée'],
-    ['SC GFA Larzac','N',56,0.22,'Conservée'],
-    ['SC GFA Larzac','N',57,0.36,'Conservée'],
-    ['SC GFA Larzac','N',58,3.33,'Conservée'],
-    ['SC GFA Larzac','N',59,0.62,'Conservée'],
-    ['SC GFA Larzac','N',78,0.46,'Conservée'],
-    ['SC GFA Larzac','N',100,1.33,'Conservée'],
-    ['SC GFA Larzac','N',109,0.59,'Conservée'],
-    ['SC GFA Larzac','N',126,1.59,'Conservée'],
-    ['SC GFA Larzac','N',127,1.57,'Conservée'],
-    ['SC GFA Larzac','O',200,1.12,'Conservée'],
-    ['SC GFA Larzac','O',201,1.44,'Conservée'],
-    ['SC GFA Larzac','O',326,0.03,'Conservée'],
-    ['SC GFA Larzac','O',331,0.04,'Conservée'],
-    ['SC GFA Larzac','O',337,0.01,'Conservée'],
-    ['SC GFA Larzac','P',38,5.08,'Nouvelle (reçue)'],
-    ['SC GFA Larzac','P',39,0.16,'Nouvelle (reçue)'],
-    ['SC GFA Larzac','P',40,0.12,'Nouvelle (reçue)'],
-    ['SC GFA Larzac','P',154,0.76,'Conservée'],
-    ['SC GFA Larzac','P',155,1.15,'Conservée'],
-    ['SCTL','A',117,0.39,'Conservée'],
-    ['SCTL','A',175,13.40,'Conservée'],
-    ['SCTL','A',176,0.87,'Conservée'],
-    ['SCTL','A',180,13.54,'Nouvelle (reçue)'],
-    ['SCTL','A',224,0.04,'Conservée'],
-    ['SCTL','A',225,0.15,'Conservée'],
-    ['SCTL','A',226,5.59,'Conservée'],
-    ['SCTL','A',227,5.42,'Conservée'],
-    ['SCTL','A',228,0.86,'Conservée'],
-    ['SCTL','A',229,0.63,'Conservée'],
-    ['SCTL','A',230,0.20,'Conservée'],
-    ['SCTL','A',231,0.46,'Conservée'],
-    ['SCTL','A',232,0.23,'Conservée'],
-    ['SCTL','A',235,0.50,'Conservée'],
-    ['SCTL','A',236,7.46,'Conservée'],
-    ['SCTL','A',237,0.57,'Conservée'],
-    ['SCTL','A',238,6.98,'Conservée'],
-    ['SCTL','A',245,13.24,'Nouvelle (reçue)'],
-    ['SCTL','A',246,13.11,'Nouvelle (reçue)'],
-    ['SCTL','N',29,0.43,'Conservée'],
-    ['SCTL','N',30,1.59,'Conservée'],
-    ['SCTL','N',31,3.89,'Conservée'],
-    ['SCTL','N',51,0.28,'Conservée'],
-    ['SCTL','N',52,0.28,'Conservée'],
-    ['SCTL','N',60,0.99,'Conservée'],
-    ['SCTL','O',369,0.02,'Conservée'],
-    ['SCTL','O',370,0.04,'Conservée'],
-    ['SCTL','O',371,4.03,'Conservée'],
-    ['SCTL','O',372,0.22,'Conservée'],
-    ['SCTL','O',373,0.10,'Conservée'],
-    ['SCTL','P',41,4.24,'Nouvelle (reçue)'],
-    ['SCTL','P',120,3.73,'Conservée'],
-    ['SCTL','P',121,0.02,'Conservée'],
-    ['SCTL','P',122,0.00,'Conservée'],
-    ['SCTL','P',143,0.29,'Conservée'],
-    ['SCTL','P',144,0.40,'Conservée'],
-    ['SCTL','P',145,7.13,'Conservée'],
-    ['SCTL','P',146,6.24,'Conservée'],
-    ['SCTL','P',147,3.95,'Conservée'],
-    ['SCTL','P',148,0.24,'Conservée'],
-    ['SCTL','P',149,0.53,'Conservée'],
-    ['SCTL','P',150,0.08,'Conservée'],
-    ['SCTL','P',151,0.91,'Conservée'],
-    ['SCTL','P',152,16.36,'Conservée'],
-    ['SCTL','P',153,0.62,'Conservée'],
-    ['SCTL','P',156,0.40,'Conservée'],
-    ['SCTL','P',270,0.17,'Conservée'],
-    ['SCTL','P',485,0.09,'Conservée'],
-    ['SCTL','P',487,4.65,'Conservée']
+    ["André Bertrand","La Couvertoirade","A",146,0.71,"Conservée"],
+    ["André Bertrand","La Couvertoirade","A",147,0.65,"Conservée"],
+    ["André Bertrand","La Couvertoirade","A",148,1.53,"Conservée"],
+    ["André Bertrand","La Couvertoirade","O",219,0.75,"Conservée"],
+    ["André Bertrand","La Couvertoirade","O",220,0.03,"Conservée"],
+    ["André Bertrand","La Couvertoirade","O",221,0.06,"Conservée"],
+    ["André Bertrand","La Couvertoirade","O",222,0.05,"Conservée"],
+    ["André Bertrand","La Couvertoirade","O",223,0.14,"Conservée"],
+    ["André Bertrand","La Couvertoirade","O",224,0.39,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",140,0.24,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",141,0.13,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",159,1.32,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",160,0.93,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",161,2.62,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",162,0.65,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",163,0.84,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",164,0.24,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",165,5.36,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",166,0.19,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",167,0.37,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",168,0.62,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",170,0.98,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",247,17.62,"Nouvelle (reçue)"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",248,0.73,"Nouvelle (reçue)"],
+    ["Commune de La Couvertoirade","La Couvertoirade","A",249,0.07,"Nouvelle (reçue)"],
+    ["Commune de La Couvertoirade","La Couvertoirade","M",32,0.69,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","M",36,1.08,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","M",316,2.4,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","M",319,2.77,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","M",320,0.29,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","M",323,0.92,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","N",15,0.15,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","N",16,4.84,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","N",17,0.49,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","N",19,4.79,"Conservée"],
+    ["Commune de La Couvertoirade","La Couvertoirade","N",98,0.68,"Nouvelle (reçue)"],
+    ["Commune de La Couvertoirade","La Couvertoirade","N",99,4.16,"Nouvelle (reçue)"],
+    ["Commune de La Couvertoirade","La Couvertoirade","O",199,0.11,"Conservée"],
+    ["Huissoud Bernard","La Couvertoirade","N",53,0.26,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",111,0.43,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",112,0.29,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",113,1.9,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",114,0.53,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",115,0.28,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",116,2.44,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",119,1.22,"Nouvelle (reçue)"],
+    ["SC GFA Larzac","La Couvertoirade","A",120,0.36,"Nouvelle (reçue)"],
+    ["SC GFA Larzac","La Couvertoirade","A",169,2.85,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",171,0.62,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",207,0.75,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",208,0.6,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",209,3.59,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",210,0.68,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",211,0.78,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",212,0.83,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",213,3.08,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",214,0.12,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",220,0.22,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",221,4.67,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","A",223,0.03,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","N",54,2.26,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","N",55,0.29,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","N",56,0.22,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","N",57,0.36,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","N",58,3.33,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","N",59,0.62,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","N",78,0.46,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","N",100,1.33,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","N",109,0.59,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","N",126,1.59,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","N",127,1.57,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","O",200,1.12,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","O",201,1.44,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","O",326,0.03,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","O",331,0.04,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","O",337,0.01,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","P",38,5.08,"Nouvelle (reçue)"],
+    ["SC GFA Larzac","La Couvertoirade","P",39,0.16,"Nouvelle (reçue)"],
+    ["SC GFA Larzac","La Couvertoirade","P",40,0.12,"Nouvelle (reçue)"],
+    ["SC GFA Larzac","La Couvertoirade","P",154,0.76,"Conservée"],
+    ["SC GFA Larzac","La Couvertoirade","P",155,1.15,"Conservée"],
+    ["SCTL","La Couvertoirade","A",117,0.39,"Conservée"],
+    ["SCTL","La Couvertoirade","A",175,13.4,"Conservée"],
+    ["SCTL","La Couvertoirade","A",176,0.87,"Conservée"],
+    ["SCTL","La Couvertoirade","A",180,13.54,"Nouvelle (reçue)"],
+    ["SCTL","La Couvertoirade","A",224,0.04,"Conservée"],
+    ["SCTL","La Couvertoirade","A",225,0.15,"Conservée"],
+    ["SCTL","La Couvertoirade","A",226,5.59,"Conservée"],
+    ["SCTL","La Couvertoirade","A",227,5.42,"Conservée"],
+    ["SCTL","La Couvertoirade","A",228,0.86,"Conservée"],
+    ["SCTL","La Couvertoirade","A",229,0.63,"Conservée"],
+    ["SCTL","La Couvertoirade","A",230,0.2,"Conservée"],
+    ["SCTL","La Couvertoirade","A",231,0.46,"Conservée"],
+    ["SCTL","La Couvertoirade","A",232,0.23,"Conservée"],
+    ["SCTL","La Couvertoirade","A",235,0.5,"Conservée"],
+    ["SCTL","La Couvertoirade","A",236,7.46,"Conservée"],
+    ["SCTL","La Couvertoirade","A",237,0.57,"Conservée"],
+    ["SCTL","La Couvertoirade","A",238,6.98,"Conservée"],
+    ["SCTL","La Couvertoirade","A",245,13.24,"Nouvelle (reçue)"],
+    ["SCTL","La Couvertoirade","A",246,13.11,"Nouvelle (reçue)"],
+    ["SCTL","La Couvertoirade","N",29,0.43,"Conservée"],
+    ["SCTL","La Couvertoirade","N",30,1.59,"Conservée"],
+    ["SCTL","La Couvertoirade","N",31,3.89,"Conservée"],
+    ["SCTL","La Couvertoirade","N",51,0.28,"Conservée"],
+    ["SCTL","La Couvertoirade","N",52,0.28,"Conservée"],
+    ["SCTL","La Couvertoirade","N",60,0.99,"Conservée"],
+    ["SCTL","La Couvertoirade","O",369,0.02,"Conservée"],
+    ["SCTL","La Couvertoirade","O",370,0.04,"Conservée"],
+    ["SCTL","La Couvertoirade","O",371,4.03,"Conservée"],
+    ["SCTL","La Couvertoirade","O",372,0.22,"Conservée"],
+    ["SCTL","La Couvertoirade","O",373,0.1,"Conservée"],
+    ["SCTL","La Couvertoirade","P",41,4.24,"Nouvelle (reçue)"],
+    ["SCTL","La Couvertoirade","P",120,3.73,"Conservée"],
+    ["SCTL","La Couvertoirade","P",121,0.02,"Conservée"],
+    ["SCTL","La Couvertoirade","P",122,0,"Conservée"],
+    ["SCTL","La Couvertoirade","P",143,0.29,"Conservée"],
+    ["SCTL","La Couvertoirade","P",144,0.4,"Conservée"],
+    ["SCTL","La Couvertoirade","P",145,7.13,"Conservée"],
+    ["SCTL","La Couvertoirade","P",146,6.24,"Conservée"],
+    ["SCTL","La Couvertoirade","P",147,3.95,"Conservée"],
+    ["SCTL","La Couvertoirade","P",148,0.24,"Conservée"],
+    ["SCTL","La Couvertoirade","P",149,0.53,"Conservée"],
+    ["SCTL","La Couvertoirade","P",150,0.08,"Conservée"],
+    ["SCTL","La Couvertoirade","P",151,0.91,"Conservée"],
+    ["SCTL","La Couvertoirade","P",152,16.36,"Conservée"],
+    ["SCTL","La Couvertoirade","P",153,0.62,"Conservée"],
+    ["SCTL","La Couvertoirade","P",156,0.4,"Conservée"],
+    ["SCTL","La Couvertoirade","P",270,0.17,"Conservée"],
+    ["SCTL","La Couvertoirade","P",485,0.09,"Conservée"],
+    ["SCTL","La Couvertoirade","P",487,4.65,"Conservée"],
+    ["SCTL","Cornus","B",91,1.09,"Conservée"],
+    ["SCTL","Cornus","B",92,1.42,"Conservée"]
   ];
 
-  function buildSeedParcels(){
+  function buildSeedParcel(r, i){
+    var commune = r[1];
     var now = new Date().toISOString();
-    return SEED_ROWS.map(function(r, i){
-      return {
-        id: 'seed_' + i,
-        communeName: SEED_COMMUNE.nom,
-        codeInsee: SEED_COMMUNE.codeInsee,
-        prefixe: '000',
-        section: r[1],
-        numero: String(r[2]),
-        declaredHa: r[3],
-        statut: r[4],
-        owner: r[0],
-        note: '',
-        contenance_m2: null,
-        geometry: null,
-        geomSource: null,
-        geomFetchedAt: null,
-        createdAt: now,
-        updatedAt: now
-      };
-    });
+    return {
+      id: 'seed_' + i + '_' + r[1].replace(/\s+/g,'') + '_' + r[2] + r[3],
+      communeName: commune,
+      codeInsee: KNOWN_COMMUNE_CODES[commune.trim().toLowerCase()] || null,
+      prefixe: '000',
+      section: r[2], numero: String(r[3]),
+      declaredHa: r[4], statut: r[5],
+      owner: r[0], note: '',
+      contenance_m2: null, geometry: null, geomSource: null, geomFetchedAt: null,
+      createdAt: now, updatedAt: now
+    };
   }
 
-  var DATASET_INFO = "Base initiale : accord d'échanges amiables CR 2022 / V12 — nouvelle entité foncière du GAEC des Templiers du Larzac, commune de La Couvertoirade (12082). Total déclaré au document : 255,21 ha.";
+  var DATASET_INFO = "Base initiale : accord d'échanges amiables CR 2022 / V12 — nouvelle entité foncière du GAEC des Templiers du Larzac, communes de La Couvertoirade (12082) et Cornus. Total déclaré au document : 257,72 ha.";
 
   // ---------- état / stockage ----------
 
   var state = { parcels: [], editingId: null, lastPos: null };
+  var SEEDVER_KEY = STORAGE_KEY + '_seedver';
+
+  function seedRowKey(commune, section, numero){
+    return (commune||'').trim().toLowerCase() + '|' + (section||'').trim().toUpperCase() + '|' + pad(parseInt(numero,10)||0, 4);
+  }
+
+  // Fusionne les nouvelles lignes du document source dans les données déjà enregistrées,
+  // sans jamais toucher aux parcelles déjà présentes (modifications de l'utilisateur préservées).
+  function mergeSeedInto(existingParcels, seedVersionApplied){
+    if (seedVersionApplied >= SEED_VERSION) return { parcels: existingParcels, added: 0 };
+    var existingKeys = {};
+    existingParcels.forEach(function(p){ existingKeys[seedRowKey(p.communeName, p.section, p.numero)] = true; });
+    var added = 0;
+    SEED_ROWS.forEach(function(r, i){
+      var key = seedRowKey(r[1], r[2], r[3]);
+      if (existingKeys[key]) return;
+      existingParcels.push(buildSeedParcel(r, i));
+      existingKeys[key] = true;
+      added++;
+    });
+    return { parcels: existingParcels, added: added };
+  }
 
   function loadParcels(){
+    var list = [];
+    var seedVerApplied = 0;
     try{
       var raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
-    }catch(e){}
-    var seeded = buildSeedParcels();
-    saveParcels(seeded);
-    return seeded;
+      list = raw ? JSON.parse(raw) : [];
+      var rawVer = localStorage.getItem(SEEDVER_KEY);
+      // Les données enregistrées avant la mise en place de ce versioning correspondent à la V1.
+      seedVerApplied = rawVer ? parseInt(rawVer, 10) : (list.length ? 1 : 0);
+    }catch(e){ list = []; seedVerApplied = 0; }
+
+    var merge = mergeSeedInto(list, seedVerApplied);
+    try{ localStorage.setItem(SEEDVER_KEY, String(SEED_VERSION)); }catch(e){}
+    if (merge.added) saveParcels(merge.parcels); else state.parcels = merge.parcels;
+    return merge.parcels;
   }
   function saveParcels(list){
     state.parcels = list;
@@ -559,6 +583,37 @@
     if (!elAcList.contains(e.target) && e.target !== elCommune) elAcList.style.display = 'none';
   });
 
+  // ---------- résolution du code INSEE d'une commune (geo.api.gouv.fr) ----------
+  // Utilisée quand une commune du jeu de données (ex : Cornus) n'a pas de code INSEE
+  // connu à l'avance : on le retrouve en ligne plutôt que de le deviner, puis on le met en cache.
+
+  var COMMUNE_CODE_CACHE_KEY = 'parcellaire_communecodes_v1';
+
+  function readCommuneCodeCache(){
+    try{ return JSON.parse(localStorage.getItem(COMMUNE_CODE_CACHE_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function writeCommuneCodeCache(map){
+    try{ localStorage.setItem(COMMUNE_CODE_CACHE_KEY, JSON.stringify(map)); }catch(e){}
+  }
+
+  function ensureCodeInsee(communeName, currentCode){
+    if (currentCode) return Promise.resolve(currentCode);
+    var key = normOwnerKey(communeName);
+    var known = KNOWN_COMMUNE_CODES[key];
+    if (known) return Promise.resolve(known);
+    var cache = readCommuneCodeCache();
+    if (cache[key]) return Promise.resolve(cache[key]);
+    return fetch('https://geo.api.gouv.fr/communes?nom=' + encodeURIComponent(communeName) + '&fields=code,nom&boost=population&limit=5')
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(list){
+        var match = (list || []).find(function(c){ return normOwnerKey(c.nom) === key; }) || (list && list[0]);
+        if (!match) throw new Error('commune "' + communeName + '" introuvable via geo.api.gouv.fr');
+        cache[key] = match.code;
+        writeCommuneCodeCache(cache);
+        return match.code;
+      });
+  }
+
   // ---------- API : cadastre (cadastre.data.gouv.fr, Etalab/DGFiP) ----------
 
   function fetchCommuneParcelles(codeInsee, forceRefresh){
@@ -626,7 +681,11 @@
     box.innerHTML = '<div class="msgbox info">Recherche en cours dans le cadastre officiel (cadastre.data.gouv.fr)…</div>';
     pendingGeom = null;
 
-    fetchCommuneParcelles(communeInfo.codeInsee).then(function(cache){
+    ensureCodeInsee(communeInfo.nom, communeInfo.codeInsee).then(function(code){
+      communeInfo.codeInsee = code;
+      if (editing) editing.codeInsee = code;
+      return fetchCommuneParcelles(code);
+    }).then(function(cache){
       var f = findFeature(cache, section, numero, prefixe);
       if (!f){
         box.innerHTML = '<div class="msgbox bad">Aucune parcelle Section ' + section.toUpperCase() + ' n°' + numero +
@@ -773,23 +832,33 @@
 
   document.getElementById('btnVerifyAll').addEventListener('click', function(){
     var box = document.getElementById('verifyMsg');
-    var communes = {};
-    state.parcels.forEach(function(p){ communes[p.codeInsee] = p.communeName; });
-    var codes = Object.keys(communes);
-    if (!codes.length){ box.innerHTML = '<div class="msgbox warn">Aucune parcelle enregistrée.</div>'; return; }
+    // Regroupement par nom de commune (pas par code INSEE, qui peut être encore inconnu pour
+    // une commune comme Cornus tant qu'elle n'a pas été résolue via geo.api.gouv.fr).
+    var byCommune = {};
+    state.parcels.forEach(function(p){
+      var key = normOwnerKey(p.communeName);
+      if (!byCommune[key]) byCommune[key] = { name: p.communeName, codeInsee: p.codeInsee || null };
+      if (!byCommune[key].codeInsee && p.codeInsee) byCommune[key].codeInsee = p.codeInsee;
+    });
+    var keys = Object.keys(byCommune);
+    if (!keys.length){ box.innerHTML = '<div class="msgbox warn">Aucune parcelle enregistrée.</div>'; return; }
 
-    box.innerHTML = '<div class="msgbox info">Vérification en cours pour ' + codes.length + ' commune(s)…</div>';
+    box.innerHTML = '<div class="msgbox info">Vérification en cours pour ' + keys.length + ' commune(s)…</div>';
     var totalChecked = 0, totalMatched = 0, totalFlagged = 0;
 
-    Promise.all(codes.map(function(code){
-      return fetchCommuneParcelles(code).then(function(cache){ return { code: code, cache: cache }; })
-        .catch(function(err){ return { code: code, error: err }; });
+    Promise.all(keys.map(function(key){
+      var info = byCommune[key];
+      return ensureCodeInsee(info.name, info.codeInsee).then(function(code){
+        info.codeInsee = code;
+        return fetchCommuneParcelles(code).then(function(cache){ return { key: key, info: info, cache: cache }; });
+      }).catch(function(err){ return { key: key, info: info, error: err }; });
     })).then(function(results){
       var errors = [];
       results.forEach(function(r){
-        if (r.error){ errors.push(communes[r.code] + ' : ' + r.error.message); return; }
+        if (r.error){ errors.push(r.info.name + ' : ' + r.error.message); return; }
         state.parcels.forEach(function(p){
-          if (p.codeInsee !== r.code) return;
+          if (normOwnerKey(p.communeName) !== r.key) return;
+          p.codeInsee = r.info.codeInsee;
           totalChecked++;
           var f = findFeature(r.cache, p.section, p.numero, p.prefixe);
           if (!f) return;
