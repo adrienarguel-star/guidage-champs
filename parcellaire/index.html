@@ -292,7 +292,7 @@
   var CACHE_MAX_AGE_MS = 180 * 24 * 3600 * 1000;
 
     // ---------- données de départ (document CR 2022 / V12 — échanges amiables) ----------
-  var SEED_VERSION = 2;
+  var SEED_VERSION = 3;
   var KNOWN_COMMUNE_CODES = { 'la couvertoirade': '12082' };
   var SEED_ROWS = [
     ["André Bertrand","La Couvertoirade","A",146,0.71,"Conservée"],
@@ -425,8 +425,8 @@
     ["SCTL","La Couvertoirade","P",270,0.17,"Conservée"],
     ["SCTL","La Couvertoirade","P",485,0.09,"Conservée"],
     ["SCTL","La Couvertoirade","P",487,4.65,"Conservée"],
-    ["SCTL","Cornus","B",91,1.09,"Conservée"],
-    ["SCTL","Cornus","B",92,1.42,"Conservée"]
+    ["SCTL","Cornus","B",91,1.30,"Conservée"],
+    ["SCTL","Cornus","B",92,0.11,"Conservée"]
   ];
 
   function buildSeedParcel(r, i){
@@ -445,7 +445,7 @@
     };
   }
 
-  var DATASET_INFO = "Base initiale : accord d'échanges amiables CR 2022 / V12 — nouvelle entité foncière du GAEC des Templiers du Larzac, communes de La Couvertoirade (12082) et Cornus. Total déclaré au document : 257,72 ha.";
+  var DATASET_INFO = "Base initiale : accord d'échanges amiables CR 2022 / V12 — nouvelle entité foncière du GAEC des Templiers du Larzac, communes de La Couvertoirade (12082) et Cornus. Total déclaré au document : 256,62 ha.";
 
   // ---------- état / stockage ----------
 
@@ -456,22 +456,35 @@
     return (commune||'').trim().toLowerCase() + '|' + (section||'').trim().toUpperCase() + '|' + pad(parseInt(numero,10)||0, 4);
   }
 
-  // Fusionne les nouvelles lignes du document source dans les données déjà enregistrées,
-  // sans jamais toucher aux parcelles déjà présentes (modifications de l'utilisateur préservées).
+  // Fusionne les lignes du document source (nouvelles ou corrigées) dans les données déjà
+  // enregistrées. Une ligne déjà présente n'est corrigée (surface/propriétaire/statut) que si
+  // elle n'a jamais été modifiée manuellement dans l'app (« pristine ») — une correction que
+  // vous avez faite vous-même dans l'app n'est donc jamais écrasée par une mise à jour du document.
   function mergeSeedInto(existingParcels, seedVersionApplied){
-    if (seedVersionApplied >= SEED_VERSION) return { parcels: existingParcels, added: 0 };
-    var existingKeys = {};
-    existingParcels.forEach(function(p){ existingKeys[seedRowKey(p.communeName, p.section, p.numero)] = true; });
-    var added = 0;
+    if (seedVersionApplied >= SEED_VERSION) return { parcels: existingParcels, added: 0, corrected: 0 };
+    var byKey = {};
+    existingParcels.forEach(function(p){ byKey[seedRowKey(p.communeName, p.section, p.numero)] = p; });
+    var added = 0, corrected = 0;
     SEED_ROWS.forEach(function(r, i){
       var key = seedRowKey(r[1], r[2], r[3]);
-      if (existingKeys[key]) return;
-      existingParcels.push(buildSeedParcel(r, i));
-      existingKeys[key] = true;
-      added++;
+      var existing = byKey[key];
+      if (!existing){
+        var np = buildSeedParcel(r, i);
+        existingParcels.push(np);
+        byKey[key] = np;
+        added++;
+        return;
+      }
+      var pristine = existing.updatedAt === existing.createdAt;
+      if (pristine && (existing.declaredHa !== r[4] || existing.owner !== r[0] || existing.statut !== r[5])){
+        existing.declaredHa = r[4]; existing.owner = r[0]; existing.statut = r[5];
+        corrected++;
+      }
     });
-    return { parcels: existingParcels, added: added };
+    return { parcels: existingParcels, added: added, corrected: corrected };
   }
+
+  var lastSeedMerge = null;
 
   function loadParcels(){
     var list = [];
@@ -486,7 +499,8 @@
 
     var merge = mergeSeedInto(list, seedVerApplied);
     try{ localStorage.setItem(SEEDVER_KEY, String(SEED_VERSION)); }catch(e){}
-    if (merge.added) saveParcels(merge.parcels); else state.parcels = merge.parcels;
+    if (merge.added || merge.corrected) saveParcels(merge.parcels); else state.parcels = merge.parcels;
+    lastSeedMerge = merge;
     return merge.parcels;
   }
   function saveParcels(list){
@@ -1178,6 +1192,14 @@
   renderAll();
   initMap();
   requestLocation();
+
+  if (lastSeedMerge && (lastSeedMerge.added || lastSeedMerge.corrected)){
+    var bits = [];
+    if (lastSeedMerge.added) bits.push(lastSeedMerge.added + ' parcelle(s) ajoutée(s)');
+    if (lastSeedMerge.corrected) bits.push(lastSeedMerge.corrected + ' parcelle(s) corrigée(s) (surface/propriétaire/statut)');
+    document.getElementById('verifyMsg').innerHTML =
+      '<div class="msgbox ok">Données mises à jour depuis le document source : ' + bits.join(' · ') + '.</div>';
+  }
 
   if ('serviceWorker' in navigator){
     window.addEventListener('load', function(){
